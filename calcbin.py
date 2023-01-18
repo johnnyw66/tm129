@@ -25,7 +25,7 @@ def calc_binary(number, numbits = 8, break_early = False, show_calculations = Fa
     report("***WARNING YOU NEED TO EXTEND THE numbits OPTION! ***", show_calculations)
 
   for i in range(numbits):
-    report(f"Using current decimal value {number}. This value is currently {'ODD' if number & 1 == 1 else 'EVEN'}, so bit {i} will have the binary value {number & 1}.", show_calculations)
+    report(f"Considering bit {i}, using current decimal value {number}. The value {number} is {'ODD' if number & 1 == 1 else 'EVEN'}, so bit {i} will have the binary value {number & 1}.", show_calculations)
 #    bits.append(number & 1)
     # Build up a string version of the binary value
     binstr = str(number & 1) + binstr
@@ -47,6 +47,6 @@ dotted_ip4 = '192.168.1.2'
 print(f"{dotted_ip4} == b{convert_ip4_str(dotted_ip4)}")
 
 
-number = 3
-bstr = calc_binary(number,numbits=8, show_calculations = True, break_early = True)
-print(f"{number} decimal is equalt to '{bstr}' binary")
+number = 149
+bstr = calc_binary(number,numbits=8, show_calculations = True, break_early = False)
+print(f"{number} decimal is equal to '{bstr}' binary")
