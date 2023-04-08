@@ -19,34 +19,41 @@ def report(str,show):
 
 def calc_binary(number, numbits = 8, break_early = False, show_calculations = False):
  # bits=[]
+  orgnumber = number 
   binstr = ''
-  report(f"Calculating binary value for {number}",show_calculations)
+  report(f"Calculating binary value for octet d{number}",show_calculations)
   if (number >= 1<<numbits):
     report("***WARNING YOU NEED TO EXTEND THE numbits OPTION! ***", show_calculations)
 
   for i in range(numbits):
-    report(f"Considering bit {i}, using current decimal value {number}. The value {number} is {'ODD' if number & 1 == 1 else 'EVEN'}, so bit {i} will have the binary value {number & 1}.", show_calculations)
+    report(f"{number} is {'ODD' if number & 1 == 1 else 'EVEN'} => bit{i} = {number & 1}, {number} // 2 gives {number//2}", show_calculations)
+
 #    bits.append(number & 1)
     # Build up a string version of the binary value
     binstr = str(number & 1) + binstr
-    report(f"Dividing the integer value {number} by 2 gives {number//2}", show_calculations)
     number = number // 2
     # look at possibility of breaking out early if we've reached zero
     if (break_early and number == 0):
         break
+
+  report(f"d{orgnumber} = b{binstr}",show_calculations)
   #return bits,binstr
   return binstr
 
 # Convert ipv4 dotted string to 32 bit binary string
-def convert_ip4_str(ip4_dotted):
-    binary_str_values = list(map(lambda _ : calc_binary(int(_)),ip4_dotted.split('.')))
-    return ''.join(binary_str_values)
+def convert_ip4_str(ip4_dotted,show_calculations=False, break_early = False):
+    binary_str_values = list(map(lambda _ : calc_binary(int(_),show_calculations=show_calculations, break_early=break_early),ip4_dotted.split('.')))
+    return '.'.join(binary_str_values)
 
 
-dotted_ip4 = '192.168.1.2'
-print(f"{dotted_ip4} == b{convert_ip4_str(dotted_ip4)}")
+#dotted_ip4 = '172.16.40.60'
+#dotted_ip4 = '200.120.192.16'
+dotted_ip4 = '192.168.200.10'
 
 
-number = 149
-bstr = calc_binary(number,numbits=8, show_calculations = True, break_early = False)
-print(f"{number} decimal is equal to '{bstr}' binary")
+print(f"{dotted_ip4} == b{convert_ip4_str(dotted_ip4,show_calculations=True, break_early=False)}")
+
+
+#number = 149
+#bstr = calc_binary(number,numbits=8, show_calculations = True, break_early = False)
+#print(f"{number} decimal is equal to '{bstr}' binary")
