@@ -1,0 +1,255 @@
+groups # List all groups currently used
+cat /etc/group  #List groups with GUID
+groups USER # List all groups
+id USER #List UID, GID (primary GID) - 
+
+EG.
+id pi
+
+uid=1000(pi) gid=1000(pi) groups=1000(pi),4(adm),20(dialout),24(cdrom),27(sudo),29(audio),44(video),46(plugdev),60(games),100(users),104(input),106(render),108(netdev),999(spi),998(i2c),997(gpio),117(lpadmin)
+
+
+
+getent group developers  #List all USER members belonging to group 'developers'
+
+# Clean up
+
+sudo rm -rf /shared/
+
+sudo deluser --remove-home stark
+sudo deluser --remove-home lannister
+sudo deluser --remove-home nicky
+sudo deluser --remove-home kit
+sudo deluser --remove-home rep
+sudo deluser --remove-home manager
+
+
+sudo delgroup union
+sudo delgroup management
+sudo delgroup workers
+sudo delgroup acme
+
+
+
+# Done on a raspberry-pi (Raspian) where user 'pi' has sudo privileges
+
+sudo addgroup acme
+sudo addgroup union
+sudo addgroup management
+sudo addgroup workers
+
+# Stark user and groups
+sudo adduser --disabled-password stark
+sudo addgroup stark acme
+sudo addgroup stark management
+
+# Lannister user and groups
+sudo adduser --disabled-password lannister
+sudo addgroup lannister acme
+sudo addgroup lannister management
+
+
+# Nicky user and groups  (worker with union membership)
+sudo adduser --disabled-password nicky
+sudo addgroup nicky acme
+sudo addgroup nicky union
+sudo addgroup nicky workers
+
+# Kit user and groups (worker with union membership)
+sudo adduser --disabled-password kit
+sudo addgroup kit acme
+sudo addgroup kit union
+sudo addgroup kit workers
+
+
+# Add a 'dummy' user 'acme' (user acme belongs to 'nogroup')
+sudo adduser --disabled-password --no-create-home  --system acme
+
+# Add a 'dummy' user 'manager' (user acme belongs to 'nogroup')
+sudo adduser --disabled-password --no-create-home  --system manager
+
+# Add a 'dummy' user 'rep'
+# We need some user to own 'members.txt' - the union file
+# when we remove Nicky as the owner
+sudo adduser --disabled-password --no-create-home  --system rep
+
+# Shared files and folder (For brevity - files will be in one folder)
+
+# 'Top' Directory '/shared' for Acme Company
+sudo mkdir /shared
+sudo chown acme:acme /shared
+sudo chmod u=rw,g=r,o= /shared
+
+# Holiday File - read/write by members of group 'acme'
+sudo touch /shared/holidays.txt
+sudo chown acme:acme /shared/holidays.txt
+sudo chmod u=rw,g=rw,o= /shared/holidays.txt
+
+
+#Union Members
+sudo touch /shared/members.txt
+sudo chown nicky:union /shared/members.txt
+sudo chmod u=rw,g=r,o= /shared/members.txt
+
+#Management Files
+sudo touch /shared/plans.txt
+sudo chown manager:management /shared/plans.txt
+sudo chmod u=rw,g=rw,o= /shared/plans.txt
+
+sudo touch /shared/pay.txt
+sudo chown manager:management /shared/pay.txt
+sudo chmod u=rw,g=rw,o= /shared/pay.txt
+
+# Write out our initial plans and pay files
+sudo su manager
+whoami
+echo 'We will be the best by 2024' >> /shared/plans.txt
+echo 'Acme Pay Scales' >> /shared/pay.txt
+exit
+
+# Get the two managers to Write some plans and pay and read both management files back
+# Stark add his own wages
+sudo su stark
+whoami
+echo 'Stark - £60k' >> /shared/pay.txt
+echo 'Plan for equal pay by 2025' >> /shared/plans.txt
+cat /shared/pay.txt
+cat /shared/plans.txt
+exit
+
+sudo su lannister
+whoami
+echo 'Lannister - £120k more than Stark' >> /shared/pay.txt
+echo 'We will rule the world by 2030' >> /shared/plans.txt
+cat /shared/pay.txt
+cat /shared/plans.txt
+exit
+
+
+
+
+# Write out members file
+
+
+sudo su nicky
+whoami
+touch /shared/members.txt
+echo 'Membership File - Acme Union Members for 2023' >> /shared/members.txt
+
+
+# Nicky Leaves the Trade Union and Joins the Management team
+sudo deluser nicky union
+sudo chown rep:union /shared/members.txt
+sudo addgroup nicky management
+
+# Check that Nicky - no longer has access to members.txt
+sudo su nicky
+whoami
+more /shared/members.txt
+echo 'Try and Add Text' >> /shared/members.txt
+
+# Make sure Nicky can read management stuff
+more /shared/plans.txt
+exit
+
+# Check Kit can still read members file (and also check it she can not write)
+sudo chown nicky:union /shared/members.txt
+sudo chmod u=rw,g=r,o= /shared/members.txt
+
+sudo su kit
+whoami
+echo 'Our Members File' >> /shared/members.txt
+cat /shared/members.txt
+exit
+
+
+
+
+sudo adduser --disabled-password stark
+sudo addgroup stark acme
+sudo addgroup stark management
+
+sudo adduser --disabled-password lannister
+sudo addgroup lannister acme
+sudo addgroup lannister management
+
+
+sudo adduser --disabled-password nicky
+sudo addgroup nicky acme
+sudo addgroup nicky workers
+sudo addgroup nicky union
+
+sudo adduser --disabled-password kit
+sudo addgroup kit acme
+sudo addgroup kit workers
+sudo addgroup kit union
+
+
+
+
+sudo mkdir /shared
+sudo chown root:acme /shared
+
+# Create a list of members owned by union rep nicky
+sudo touch /shared/members.txt
+sudo chown reps:union /shared/members.txt
+# Allow owner to read/write, group members read, others - no access
+sudo chmod u=rw,g=r,o= /shared/members.txt
+echo 'Kit, Nicky' >> /shared/members.txt
+cat members.txt
+exit
+sudo su kit
+echo 'Try and Append' >> /shared/members.txt
+exit
+sudo su stark
+echo 'Try and Append' >> /shared/members.txt
+exit
+sudo su lannister
+echo 'Try and Append' >> /shared/members.txt
+exit
+
+# Make sure Nicky is the only one with write permission
+sudo touch /shared/members.txt
+sudo chown nicky:acme /shared/members.txt
+sudo chmod u=rw,g=r,o= /shared/members.txt
+sudo su nicky
+echo 'Members Only' >> /shared/members.txt
+cat /shared/members.txt
+exit
+sudo su kit
+echo 'Members Only' >> /shared/members.txt
+cat /shared/members.txt
+exit
+sudo su stark
+echo 'Members Only' >> /shared/members.txt
+cat /shared/members.txt
+exit
+sudo su lannister
+echo 'Members Only' >> /shared/members.txt
+cat /shared/members.txt
+exit
+
+
+
+
+
+
+# Move nicky to Management Group and check access to members.txt
+sudo usermod -aG management nicky
+sudo deluser nicky union
+sudo chown rep:union /shared/members.txt
+sudo su nicky
+cat /shared/members.txt
+exit
+sudo su kit
+cat /shared/members.txt
+exit
+
+
+
+
+
+
+
+echo 'try and append' >> members.txt
+
